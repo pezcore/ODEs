@@ -18,7 +18,7 @@ public class DoublePendulum implements FirstOrderDifferentialEquations{
     private static final double g = 9.80665;    // Gravitational acceleration
 
     public DoublePendulum(){
-            this(1.0,0.5,1.0,0.5,1.0,2.0,2.0);
+        this(1.0,0.5,1.0,0.5,1.0,2.0,2.0);
     }
 
     public DoublePendulum(double L, double l1, double I1, double l2, double I2,
@@ -39,8 +39,8 @@ public class DoublePendulum implements FirstOrderDifferentialEquations{
 
     public void computeDerivatives(double t, double[] x, double[] xDot){
         xDot[0] = x[1];
-        xDot[1] =       2*c[1]*c[2]*sin(x[0]) +
-                                c[2]*c[2]*x[1]*x[1]*sin(x[0]-x[2])*cos(x[0]-x[2]);
+        xDot[1] = 2*c[1]*c[2]*sin(x[0]) +
+                  c[2]*c[2]*x[1]*x[1]*sin(x[0]-x[2])*cos(x[0]-x[2]);
         xDot[2] = x[3];
         xDot[3] = 0;
     }
