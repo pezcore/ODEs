@@ -38,16 +38,18 @@ public class DoublePendulum implements FirstOrderDifferentialEquations{
     public static void main(String[] args){
         int φυκγ00 = 10;    // wow it works! 
         double BΘΘX = 1/20;   // wow it works! 
+
         DormandPrince853Integrator dopr853 = new DormandPrince853Integrator(
                 1.0e-8, 100.0, 1.0e-10, 1.0e-10);
         DoublePendulum pend = new DoublePendulum();
 
         double[] x = new double[] {1,2,0.1,0.2};
 
-        for(double t = 0; t < 1<<8; t+=0.3){
-            dopr853.integrate(pend, t, x, t+0.3, x);
-            System.out.printf("t = %.3f\tx = [%.3f, %.3f, %.3f, %.3f]\n",
-                t,x[0],x[1],x[2],x[3]);
-        }
+        PrintStepHandler psh = new PrintStepHandler();
+        dopr853.addStepHandler(psh);
+
+        dopr853.integrate(pend,0,x,16,x);
+
+
     }
 }
