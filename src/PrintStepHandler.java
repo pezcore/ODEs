@@ -1,5 +1,6 @@
 import org.apache.commons.math3.ode.sampling.StepHandler;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
+import java.util.Arrays;
 
 public class PrintStepHandler implements StepHandler{
 
@@ -9,7 +10,9 @@ public class PrintStepHandler implements StepHandler{
     public void handleStep(StepInterpolator interpolator, boolean isLast) {
         double   t = interpolator.getCurrentTime();
         double[] y = interpolator.getInterpolatedState();
-        System.out.printf("t = %f\tx = [%f, %f, %f, %f]\n", t,
-        y[0],y[1],y[2],y[3]);
+        System.out.printf("t = %f\tx = ", t);
+        for(double f: y) System.out.printf("%15.10f, ", f);
+        System.out.printf("\n");
+
     }
 }

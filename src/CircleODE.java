@@ -2,12 +2,7 @@ import org.apache.commons.math3.ode.*;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;;
 import java.util.*;
 
-
 public class CircleODE implements MainStateJacobianProvider{
-
-    public static final String CENTER_X = "cx";
-    public static final String CENTER_Y = "cy";
-    public static final String OMEGA    = "omega";
 
     private double[] c;
     private double omega;
@@ -38,14 +33,13 @@ public class CircleODE implements MainStateJacobianProvider{
         dFdY[1][1] = 0;
     }
 
-     public static void main(String[] args){
+    public static void main(String[] args){
 
-        CircleODE circle = new CircleODE(new double[] {1.0,  1.0 }, 0.1);
+        CircleODE circle = new CircleODE(new double[] {1.0,  1.0 }, 1);
 
         // here, we could select only a subset of the parameters, or use
         // another order
-        JacobianMatrices jm = new JacobianMatrices(circle, CircleODE.CENTER_X,
-        CircleODE.CENTER_Y, CircleODE.OMEGA);
+        JacobianMatrices jm = new JacobianMatrices(circle);
 
         ExpandableStatefulODE efode = new ExpandableStatefulODE(circle);
         efode.setTime(0);
@@ -56,19 +50,23 @@ public class CircleODE implements MainStateJacobianProvider{
         // equations, as secondary equations
         jm.registerVariationalEquations(efode);
 
+        // instantiate step handler
+        PrintStepHandler psh = new PrintStepHandler();
+
         // integrate the compound state, with both main and additional
         // equations
         DormandPrince853Integrator integrator = new DormandPrince853Integrator(
             1.0e-6, 1.0e3, 1.0e-10, 1.0e-12);
-        integrator.setMaxEvaluations(5000);
+        integrator.addStepHandler(psh);
+        integrator.setMaxEvaluations(2<<10);
         integrator.integrate(efode, 20.0);
 
         // retrieve the Jacobian of the final state with respect to initial
         // state
         double[][] dYdY0 = new double[2][2];
+        System.out.printf("Before getCurrentMainSetJacobian: [%f,%f\n%f,%f]\n",
+        dYdY0[0][0],dYdY0[1][0],dYdY0[1][0],dYdY0[1][1]);
+
         jm.getCurrentMainSetJacobian(dYdY0);
-
     }
-        
-
 }
