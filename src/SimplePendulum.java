@@ -1,5 +1,6 @@
 import org.apache.commons.math3.ode.*;
 import org.apache.commons.math3.ode.nonstiff.*;
+import org.apache.commons.math3.exception.*;
 /**
 A so-called "simple pendulum" is an idealization of a "real pendulum" but in an
 isolated system using the following assumptions:
@@ -22,11 +23,11 @@ The differential equation which represents the motion of a simple pendulum is
 
 θ'' = - g / l sin(θ)
 */
-public class SimplePendulum implements FirstOrderDifferentialEquations{
+public class SimplePendulum implements MainStateJacobianProvider{
 
     double l; // Length
     public static final double g = 9.807;  // earth gravity m·s^-2
-    ExpandableStatefulODE efode;
+    public ExpandableStatefulODE efode;
 
     public SimplePendulum(){
         this(1.0);
@@ -35,6 +36,9 @@ public class SimplePendulum implements FirstOrderDifferentialEquations{
     public SimplePendulum(double l){
         this.l = l;
         efode = new ExpandableStatefulODE(this);
+        JacobianMatrices jm = new JacobianMatrices(this);
+        // create the variational equations and append them to the main equations, as secondary equations
+        jm.registerVariationalEquations(efode);
     }
 
     public int getDimension(){return 2;}
@@ -43,6 +47,17 @@ public class SimplePendulum implements FirstOrderDifferentialEquations{
         dxdt[0] = x[1];
         dxdt[1] = -g/l*Math.sin(x[0]);
     }
+
+    public void computeMainStateJacobian(double t, double[] x, double[] xDot,
+        double[][] dfdx) throws MaxCountExceededException,
+            DimensionMismatchException{
+        dfdx[0][0] = 0;
+        dfdx[0][1] = 1;
+        dfdx[1][0] = -g/l*Math.cos(x[0]);
+        dfdx[1][1] = 0;
+    }
+
+
 
     public static void main(String[] args){
         // Create the pendulum and set its initial state and time: x(0)=[0,.0]
