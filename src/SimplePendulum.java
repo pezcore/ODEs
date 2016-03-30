@@ -1,6 +1,8 @@
 import org.apache.commons.math3.ode.*;
 import org.apache.commons.math3.ode.nonstiff.*;
 import org.apache.commons.math3.exception.*;
+
+import java.util.Arrays;
 /**
 A so-called "simple pendulum" is an idealization of a "real pendulum" but in an
 isolated system using the following assumptions:
@@ -57,17 +59,24 @@ public class SimplePendulum implements MainStateJacobianProvider{
         dfdx[1][1] = 0;
     }
 
-
-
     public static void main(String[] args){
         // Create the pendulum and set its initial state and time: x(0)=[0,.0]
         SimplePendulum sp = new SimplePendulum();
         sp.efode.setTime(0.0);
         sp.efode.setPrimaryState(new double[] {0.0,0.1});
+        System.out.println("Initialization");
+        System.out.printf("t = %10.5f\n",sp.efode.getTime());
+        System.out.printf("Primary State = %s\n",
+            Arrays.toString(sp.efode.getPrimaryState()));
+        System.out.printf("secondary state = %s\n",
+            Arrays.toString(sp.efode.getSecondaryState(0)));
+        for(int ii = 0; ii < 80; ii++) System.out.printf("-");
+        System.out.printf("\n");
         EmbeddedRungeKuttaIntegrator dopr853 = new DormandPrince853Integrator(
             1.0e-8, 1, 1.0e-10, 1.0e-10);
         EulerIntegrator euler = new EulerIntegrator(0.01);
-        euler.addStepHandler(new PrintStepHandler());
-        euler.integrate(sp.efode, 10.0);
+        dopr853.addStepHandler(new PrintStepHandler());
+        dopr853.integrate(sp.efode, 10.0);
+        
     }
 }
