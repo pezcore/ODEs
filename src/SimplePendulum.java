@@ -30,6 +30,7 @@ public class SimplePendulum implements MainStateJacobianProvider{
     double l; // Length
     public static final double g = 9.807;  // earth gravity m·s^-2
     public ExpandableStatefulODE efode;
+    public JacobianMatrices jm;
 
     public SimplePendulum(){
         this(1.0);
@@ -38,8 +39,9 @@ public class SimplePendulum implements MainStateJacobianProvider{
     public SimplePendulum(double l){
         this.l = l;
         efode = new ExpandableStatefulODE(this);
-        JacobianMatrices jm = new JacobianMatrices(this);
-        // create the variational equations and append them to the main equations, as secondary equations
+        // create the variational equations and append them to the main
+        // equations, as secondary equations
+        jm = new JacobianMatrices(this);
         jm.registerVariationalEquations(efode);
     }
 
@@ -60,22 +62,24 @@ public class SimplePendulum implements MainStateJacobianProvider{
     }
 
     public static void main(String[] args){
-        // Create the pendulum and set its initial state and time: x(0)=[0,.0]
-        SimplePendulum sp = new SimplePendulum();
+        // Create the pendulum and set its initial state and time: x(0)=[0,0.1]
+        SimplePendulum sp = new SimplePendulum(2);
         sp.efode.setTime(0.0);
-        sp.efode.setPrimaryState(new double[] {0.0,0.1});
+        sp.efode.setPrimaryState(new double[] {0.0,0.2});
         System.out.println("Initialization");
         System.out.printf("t = %10.5f\n",sp.efode.getTime());
         System.out.printf("Primary State = %s\n",
             Arrays.toString(sp.efode.getPrimaryState()));
         System.out.printf("secondary state = %s\n",
             Arrays.toString(sp.efode.getSecondaryState(0)));
+        System.out.printf("total State Dimension is %d\n",
+            sp.efode.getTotalDimension());
         for(int ii = 0; ii < 80; ii++) System.out.printf("-");
         System.out.printf("\n");
         EmbeddedRungeKuttaIntegrator dopr853 = new DormandPrince853Integrator(
-            1.0e-8, 1, 1.0e-10, 1.0e-10);
+            1.0e-8, 0.1, 1.0e-10, 1.0e-10);
         EulerIntegrator euler = new EulerIntegrator(0.01);
-        dopr853.addStepHandler(new PrintStepHandler());
+        dopr853.addStepHandler(new PrintStepHandler(sp.jm));
         dopr853.integrate(sp.efode, 10.0);
         
     }
